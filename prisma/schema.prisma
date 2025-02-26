@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  full_name String
+  email     String     @unique
+  gender    GENDER
+  password  String
+  role      UserRole   @default(STUDENT)
+  status    UserStatus @default(ACTIVE)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tutor     Tutor?
+  student   Student?
+  @@map("users")
+}
+
+model Tutor {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  country          String
+  phone_number     Int?
+  user_id          String  @unique @db.ObjectId
+  user             User    @relation(fields: [user_id], references: [id])
+  profile_image    String?
+  last_earning     Float   @default(0)
+  total_earning    Float   @default(0)
+  available        Float   @default(0)
+  // university details
+  university       String
+  subject          String
+  degree           String
+  degreeType       String
+  study_start_year Int
+  study_end_year   Int
+  certification    String
+  certificate_url  String
+  specialization   String?
+
+  teaching_subjects String[]
+  languages         String[]
+  services          String[]
+  skills            String[]
+  session_duration  Int
+  session_price     Float
+
+  // summary section
+  completed_task         Int       @default(0)
+  regular_student        Int       @default(0)
+  last_completed_task_at DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  slots Slot[]
+  tasks Task[]
+
+  @@map("tutors")
+}
+
+model Student {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  subject       String
+  profile_image String?
+  user_id       String  @unique @db.ObjectId
+  balance       Float   @default(0)
+  user          User    @relation(fields: [user_id], references: [id])
+  grade         String // A Level, O Level, etc
+  country       String
+  bio           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks Task[]
+
+  @@map("students")
+}
+
+model Task {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  topic                String
+  date                 DateTime
+  time                 String
+  tutor_id             String   @db.ObjectId
+  tutor                Tutor    @relation(fields: [tutor_id], references: [id])
+  student_id           String   @db.ObjectId
+  student              Student  @relation(fields: [student_id], references: [id])
+  extra_services       String?
+  extra_services_price Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tasks")
+}
+
+model Message {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  content         String
+  conversation_id String         @db.ObjectId
+  conversations   Conversation   @relation(fields: [conversation_id], references: [id], name: "conversation_message")
+  is_seen         Boolean        @default(false)
+  seen_timestemp  DateTime?
+  conversation    Conversation[] @relation("last_message")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("messages")
+}
+
+model Conversation {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  participents String[]  @db.ObjectId // user id's will be store here
+  Messages     Message[] @relation("conversation_message")
+
+  last_message_id        String?   @db.ObjectId
+  last_message           Message?  @relation(fields: [last_message_id], references: [id], name: "last_message", onDelete: NoAction, onUpdate: NoAction)
+  last_message_timestemp DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("conversations")
+}
+
+type Slot {
+  start_time DateTime
+  end_time   DateTime
+  day        Week
+}
+
+enum Week {
+  SATURDAY
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+enum GENDER {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  TUTOR
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING
+  BLOCKED
+}
