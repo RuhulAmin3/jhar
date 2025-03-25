@@ -8,156 +8,173 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  full_name String
-  email     String     @unique
-  gender    GENDER
-  password  String
-  role      UserRole   @default(STUDENT)
-  status    UserStatus @default(ACTIVE)
-  
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  full_name      String
+  email          String     @unique
+  password       String?
+  interest       String?
+  favourite_town String?
+  registerBy     RegisterBy @default(MANUAL)
+  role           UserRole   @default(USER)
+  status         UserStatus @default(ACTIVE)
+
+  wishlist  String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tutor     Tutor?
-  student   Student?
+
+  comments Comment[]
+  posts    Post[]
+
   @@map("users")
 }
 
-model Tutor {
-  id               String  @id @default(auto()) @map("_id") @db.ObjectId
-  country          String
-  phone_number     Int?
-  user_id          String  @unique @db.ObjectId
-  user             User    @relation(fields: [user_id], references: [id])
-  profile_image    String?
-  last_earning     Float   @default(0)
-  total_earning    Float   @default(0)
-  available        Float   @default(0)
-  // university details
-  university       String
-  subject          String
-  degree           String
-  degreeType       String
-  study_start_year Int
-  study_end_year   Int
-  certification    String
-  certificate_url  String
-  specialization   String?
-
-  teaching_subjects String[]
-  languages         String[]
-  services          String[]
-  skills            String[]
-  session_duration  Int
-  session_price     Float
-
-  // summary section
-  completed_task         Int       @default(0)
-  regular_student        Int       @default(0)
-  last_completed_task_at DateTime?
+model EventCategory {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String @unique
+  description String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  slots Slot[]
-  tasks Task[]
+  events Event[]
 
-  @@map("tutors")
+  @@map("event_categories")
 }
 
-model Student {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
-  subject       String
-  profile_image String?
-  user_id       String  @unique @db.ObjectId
-  balance       Float   @default(0)
-  user          User    @relation(fields: [user_id], references: [id])
-  grade         String // A Level, O Level, etc
-  country       String
-  bio           String?
+model Event {
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  title             String 
+  event_category_id String        @db.ObjectId
+  event_category    EventCategory @relation(fields: [event_category_id], references: [id], onDelete: Cascade)
+  event_date        DateTime
+  start_time        String
+  end_time          String
+  event_types       EventType[]
+  description       String
+  capacity          Int
+  latitude          String
+  longitude         String
+  images            String[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tasks Task[]
+  blogs Blog[]
+  posts Post[]
 
-  @@map("students")
+  @@map("events")
 }
 
-model Task {
-  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
-  topic                String
-  date                 DateTime
-  time                 String
-  tutor_id             String   @db.ObjectId
-  tutor                Tutor    @relation(fields: [tutor_id], references: [id])
-  student_id           String   @db.ObjectId
-  student              Student  @relation(fields: [student_id], references: [id])
-  extra_services       String?
-  extra_services_price Float?
+model Post {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  image   String?
+  user_id String  @db.ObjectId
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  event_id String @db.ObjectId
+  event    Event? @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  content  String
+
+  likes String[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("tasks")
+  comments Comment[]
+
+  @@map("posts")
 }
 
-model Message {
-  id              String         @id @default(auto()) @map("_id") @db.ObjectId
-  content         String
-  conversation_id String         @db.ObjectId
-  conversations   Conversation   @relation(fields: [conversation_id], references: [id], name: "conversation_message")
-  is_seen         Boolean        @default(false)
-  seen_timestemp  DateTime?
-  conversation    Conversation[] @relation("last_message")
+model Comment {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  post_id String @db.ObjectId
+  user_id String @db.ObjectId
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  content String
+  post    Post   @relation(fields: [post_id], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("messages")
+  @@map("comments")
 }
 
-model Conversation {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  participents String[]  @db.ObjectId // user id's will be store here
-  Messages     Message[] @relation("conversation_message")
+model Blog {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  title    String  @unique
+  content  String
+  event_id String? @db.ObjectId
 
-  last_message_id        String?   @db.ObjectId
-  last_message           Message?  @relation(fields: [last_message_id], references: [id], name: "last_message", onDelete: NoAction, onUpdate: NoAction)
-  last_message_timestemp DateTime?
+  event Event? @relation(fields: [event_id], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("conversations")
+  @@map("blogs")
 }
 
-type Slot {
-  start_time DateTime
-  end_time   DateTime
-  day        Week
+model Booking {
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  user_id           String         @db.ObjectId
+  booking_cart      BookingCart[]
+  total_price       Float
+  payment_gateway   PaymentGateway
+  payment_intent_id String
+  status            BookingStatus  @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("bookings")
 }
 
-enum Week {
-  SATURDAY
-  SUNDAY
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
+model File {
+  id   String   @id @default(auto()) @map("_id") @db.ObjectId
+  type FileType @default(IMAGE)
+  url  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Files")
 }
 
-enum GENDER {
-  MALE
-  FEMALE
-  OTHER
+type BookingCart {
+  event_id   String    @db.ObjectId
+  quantity   Int       @default(1)
+  event_type EventType
+}
+
+type EventType {
+  title String
+  price Float
+}
+
+enum PaymentGateway {
+  PAYPAL
+  GOOGLE_PAY
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum FileType {
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+enum RegisterBy {
+  SOCIAL
+  MANUAL
 }
 
 enum UserRole {
   SUPER_ADMIN
-  TUTOR
-  STUDENT
+  USER
 }
 
 enum UserStatus {

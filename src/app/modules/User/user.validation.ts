@@ -1,15 +1,14 @@
-import { GENDER, UserRole, UserStatus } from "@prisma/client";
+import { UserRole, UserStatus } from "@prisma/client";
 import { z } from "zod";
 
-const CreateUserValidationSchema = z.object({ 
+const CreateUserValidationSchema = z.object({
   full_name: z.string(),
   email: z.string().email(),
-  gender: z.nativeEnum(GENDER),
   password: z.string(),
-  role: z.nativeEnum(UserRole).default(UserRole.STUDENT),
+  role: z.nativeEnum(UserRole).default(UserRole.USER),
   status: z.nativeEnum(UserStatus).default(UserStatus.PENDING),
 });
 
 export const UserValidation = {
-  CreateUserValidationSchema
+  CreateUserValidationSchema,
 };

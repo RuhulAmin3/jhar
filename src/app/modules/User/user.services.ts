@@ -1,17 +1,14 @@
 import prisma from "../../../shared/prisma";
-import ApiError from "../../../errors/ApiErrors";  
+import ApiError from "../../../errors/ApiErrors";
 import { IPaginationOptions } from "../../../interfaces/paginations";
 import { paginationHelper } from "../../../helpars/paginationHelper";
-import { GENDER, Prisma, User, UserRole, UserStatus } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { userSearchAbleFields } from "./user.costant";
 import httpStatus from "http-status";
 import { IParams } from "./user.interface";
 
 // reterive all users from the database also searcing anf filetering
-const getUsersFromDb = async (
-  params: IParams,
-  options: IPaginationOptions
-) => {
+const getUsersFromDb = async (params: IParams, options: IPaginationOptions) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
 
@@ -49,7 +46,7 @@ const getUsersFromDb = async (
           }
         : {
             createdAt: "desc",
-          }, 
+          },
   });
   const total = await prisma.user.count({
     where: whereConditons,
@@ -100,18 +97,16 @@ const updateProfile = async (id: string, payload: Partial<User>) => {
 };
 
 // get user
-
 const getUserById = async (id: string): Promise<User> => {
   const user = await prisma.user.findUnique({
     where: { id },
   });
-  if(!user) throw new ApiError(httpStatus.BAD_REQUEST, "user not found");
+  if (!user) throw new ApiError(httpStatus.BAD_REQUEST, "user not found");
   return user;
 };
-
 
 export const userService = {
   getUsersFromDb,
   updateProfile,
-  getUserById
+  getUserById,
 };

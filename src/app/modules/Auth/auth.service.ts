@@ -21,7 +21,7 @@ const registerUser = async (payload: User) => {
   }
   
   const hashedPassword: string = await bcrypt.hash(
-    payload.password,
+    payload.password as string,
     Number(config.bcrypt_salt_rounds)
   );
 
@@ -56,8 +56,8 @@ const loginUser = async (payload: { email: string; password: string }) => {
     );
   }
   const isCorrectPassword: boolean = await bcrypt.compare(
-    payload.password,
-    userData.password
+    payload.password as string,
+    userData.password as string
   );
 
   if (!isCorrectPassword) {
@@ -110,6 +110,10 @@ const changePassword = async (
     throw new ApiError(404, "User not found");
   }
 
+  if(!user?.password){
+    throw new ApiError(httpStatus.BAD_REQUEST, "password does not exist");
+  }
+  
   const isPasswordValid = await bcrypt.compare(oldPassword, user?.password);
 
   if (!isPasswordValid) {

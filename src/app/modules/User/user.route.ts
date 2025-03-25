@@ -11,14 +11,14 @@ router.get("/", auth(UserRole.SUPER_ADMIN), userController.getUsers);
 // Get user by ID
 router.get(
   "/:id",
-  auth(UserRole.SUPER_ADMIN, UserRole.STUDENT, UserRole.STUDENT),
+  auth(UserRole.SUPER_ADMIN, UserRole.USER, UserRole.SUPER_ADMIN),
   userController.getUserById
 );
 
 // Update user
 router.patch(
   "/:id",
-  auth(UserRole.SUPER_ADMIN, UserRole.STUDENT, UserRole.STUDENT),
+  auth(UserRole.SUPER_ADMIN, UserRole.USER, UserRole.SUPER_ADMIN),
   userController.updateUser
 );
 
