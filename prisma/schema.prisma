@@ -72,7 +72,7 @@ model Post {
   user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   event_id String @db.ObjectId
-  event    Event? @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  event    Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
   content  String
 
   likes String[]

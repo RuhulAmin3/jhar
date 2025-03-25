@@ -3,6 +3,7 @@ import { userRoutes } from "../modules/User/user.route";
 import { AuthRoutes } from "../modules/Auth/auth.routes";
 import { eventCategoryRoutes } from "../modules/EventCategory/EventCategory.routes";
 import { eventRoutes } from "../modules/Event/Event.routes";
+import { postRoutes } from "../modules/Post/Post.routes";
 
 
 const router = express.Router();
@@ -23,6 +24,10 @@ const moduleRoutes = [
   {
     path: "/event",
     route: eventRoutes,
+  },
+  {
+    path: "/post",
+    route: postRoutes,
   },
 ];
 
