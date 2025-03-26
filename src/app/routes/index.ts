@@ -5,6 +5,7 @@ import { eventCategoryRoutes } from "../modules/EventCategory/EventCategory.rout
 import { eventRoutes } from "../modules/Event/Event.routes";
 import { postRoutes } from "../modules/Post/Post.routes";
 import { blogRoutes } from "../modules/Blog/Blog.routes";
+import { commentRoutes } from "../modules/Comment/Comment.routes";
 
 
 const router = express.Router();
@@ -33,6 +34,10 @@ const moduleRoutes = [
   {
     path: "/blog",
     route: blogRoutes,
+  },
+  {
+    path: "/comment",
+    route: commentRoutes,
   },
 ];
 

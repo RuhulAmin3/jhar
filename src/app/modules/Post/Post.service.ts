@@ -161,10 +161,11 @@ const likeUnlikePost = async (id: string, userId: string) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Post not found");
   }
 
+  let updatedPost;
   // Check if the user already liked the post
   if (!post.likes.includes(userId)) {
     // Like the post: Add userId to the likes array
-    await prisma.post.update({
+    updatedPost = await prisma.post.update({
       where: { id },
       data: {
         likes: {
@@ -174,7 +175,7 @@ const likeUnlikePost = async (id: string, userId: string) => {
     });
   } else {
     // Unlike the post: Remove userId from the likes array
-    await prisma.post.update({
+    updatedPost = await prisma.post.update({
       where: { id },
       data: {
         likes: {
@@ -185,7 +186,7 @@ const likeUnlikePost = async (id: string, userId: string) => {
   }
 
   // Return the updated post
-  return post;
+  return updatedPost;
 };
 
 export const postService = {
