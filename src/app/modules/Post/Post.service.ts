@@ -1,11 +1,13 @@
-import { Prisma } from "@prisma/client";
+import { Post, Prisma } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
 import httpStatus from "http-status";
 import { IPaginationOptions } from "../../../interfaces/paginations";
 import { paginationHelper } from "../../../helpars/paginationHelper";
 
-const createPost = async (payload: Prisma.PostCreateInput) => {
+const createPost = async (userId: string, payload: Post) => {
+  payload["user_id"] = userId;
+
   const post = await prisma.post.create({
     data: payload,
   });
@@ -120,43 +122,71 @@ const deletePost = async (id: string) => {
   });
 };
 
-const likeUnlikePost = async (id: string, userId: string) => {
-    const post = await prisma.post.findUnique({
-      where: { id },
-    });
-  
-    if (!post) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "Post not found");
-    }
-  
-    // Check if the user already liked the post
-    if (!post.likes.includes(userId)) {
-      // Like the post: Add userId to the likes array
-      await prisma.post.update({
-        where: { id },
-        data: {
-          likes: {
-            push: userId, // Add userId to the array
-          },
-        },
-      });
-    } else {
-      // Unlike the post: Remove userId from the likes array
-      await prisma.post.update({
-        where: { id },
-        data: {
-          likes: {
-            set: post.likes.filter((like) => like !== userId), // Remove the userId from the array
-          },
-        },
-      });
-    }
-  
-    // Return the updated post
-    return post;
-  };
-  
+const myPosts = async (options: IPaginationOptions, userId: string) => {
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(options);
 
+  const posts = await prisma.post.findMany({
+    where: {
+      user_id: userId,
+    },
+    take: limit,
+    skip,
+  });
+
+  const total = await prisma.post.count({
+    where: {
+      user_id: userId,
+    },
+    take: limit,
+    skip,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: posts,
+  };
+};
+
+const likeUnlikePost = async (id: string, userId: string) => {
+  const post = await prisma.post.findUnique({
+    where: { id },
+  });
+
+  if (!post) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Post not found");
+  }
+
+  // Check if the user already liked the post
+  if (!post.likes.includes(userId)) {
+    // Like the post: Add userId to the likes array
+    await prisma.post.update({
+      where: { id },
+      data: {
+        likes: {
+          push: userId, // Add userId to the array
+        },
+      },
+    });
+  } else {
+    // Unlike the post: Remove userId from the likes array
+    await prisma.post.update({
+      where: { id },
+      data: {
+        likes: {
+          set: post.likes.filter((like) => like !== userId), // Remove the userId from the array
+        },
+      },
+    });
+  }
+
+  // Return the updated post
+  return post;
+};
 
 export const postService = {
   createPost,
@@ -164,5 +194,6 @@ export const postService = {
   getPost,
   updatePost,
   deletePost,
-  likeUnlikePost
+  likeUnlikePost,
+  myPosts
 };

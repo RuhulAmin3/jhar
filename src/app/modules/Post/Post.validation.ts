@@ -1,9 +1,6 @@
 import { z } from "zod";
 
 const createPostSchema = z.object({
-  user_id: z.string({
-    required_error: "User ID is required",
-  }),
   event_id: z.string({
     required_error: "Event ID is required",
   }),
@@ -14,7 +11,7 @@ const createPostSchema = z.object({
     .min(1, {
       message: "Content cannot be empty",
     }),
-  image: z.string().optional(), // Image is optional
+  image: z.array(z.string()).optional().default([]),
 });
 
 const updatePostSchema = z.object({
@@ -24,17 +21,10 @@ const updatePostSchema = z.object({
       message: "Content cannot be empty",
     })
     .optional(),
-  image: z.string().optional(),
-});
-
-const likeUnlikePostSchema = z.object({
-  user_id: z.string({
-    required_error: "User ID is required",
-  }),
+  image: z.array(z.string()).optional(),
 });
 
 export const postValidation = {
   createPostSchema,
   updatePostSchema,
-  likeUnlikePostSchema,
 };

@@ -43,7 +43,7 @@ model EventCategory {
 
 model Event {
   id                String        @id @default(auto()) @map("_id") @db.ObjectId
-  title             String 
+  title             String
   event_category_id String        @db.ObjectId
   event_category    EventCategory @relation(fields: [event_category_id], references: [id], onDelete: Cascade)
   event_date        DateTime
@@ -67,12 +67,12 @@ model Event {
 
 model Post {
   id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  image   String?
+  image   String[]  @default([])
   user_id String  @db.ObjectId
   user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   event_id String @db.ObjectId
-  event    Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  event    Event  @relation(fields: [event_id], references: [id], onDelete: Cascade)
   content  String
 
   likes String[]
@@ -101,7 +101,7 @@ model Comment {
 
 model Blog {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  title    String  @unique
+  title    String  
   content  String
   event_id String? @db.ObjectId
 

@@ -16,16 +16,12 @@ router.post(
 );
 
 // Route to get all posts (can filter by eventId or searchTerm)
-router.get(
-  "/",
-  PostController.getAllPosts
-);
+router.get("/", PostController.getAllPosts);
+
+router.get("/my-posts", auth(UserRole.USER), PostController.myPosts);
 
 // Route to get a specific post by ID
-router.get(
-  "/:id",
-  PostController.getPost
-);
+router.get("/:id", PostController.getPost);
 
 // Route to update a post by ID
 router.patch(
@@ -38,16 +34,11 @@ router.patch(
 // Route to delete a post by ID
 router.delete(
   "/:id",
-  auth(UserRole.USER), // Assuming only the post creator or an admin can delete posts
+  auth(UserRole.USER, UserRole.SUPER_ADMIN), // Assuming only the post creator or an admin can delete posts
   PostController.deletePost
 );
 
 // Route to like or unlike a post (toggles like status)
-router.patch(
-  "/:id/like",
-  auth(UserRole.USER), // Assuming only authenticated users can like/unlike posts
-  validateRequest(postValidation.likeUnlikePostSchema), // Validate user ID for like/unlike action
-  PostController.likeUnlikePost
-);
+router.patch("/:id/like", auth(UserRole.USER), PostController.likeUnlikePost);
 
 export const postRoutes = router;

@@ -8,7 +8,8 @@ import pick from "../../../shared/pick";  // Assuming you have a helper for pick
 const createPost = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const data = req.body;
-    const post = await postService.createPost(data);
+    const userId = req.user.id;
+    const post = await postService.createPost(userId,  data);
 
     sendResponse(res, {
       success: true,
@@ -29,6 +30,21 @@ const getAllPosts = catchAsync(
       success: true,
       statusCode: httpStatus.OK,
       message: "All posts retrieved successfully",
+      data: posts,
+    });
+  }
+);
+
+const myPosts = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => { 
+    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+    const userId = req.user.id;
+    const posts = await postService.myPosts(options, userId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "my posts retrieved successfully",
       data: posts,
     });
   }
@@ -99,4 +115,5 @@ export const PostController = {
   updatePost,
   deletePost,
   likeUnlikePost,
+  myPosts,
 };
