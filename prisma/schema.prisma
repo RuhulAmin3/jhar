@@ -66,10 +66,10 @@ model Event {
 }
 
 model Post {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  image   String[]  @default([])
-  user_id String  @db.ObjectId
-  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  image   String[] @default([])
+  user_id String   @db.ObjectId
+  user    User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   event_id String @db.ObjectId
   event    Event  @relation(fields: [event_id], references: [id], onDelete: Cascade)
@@ -101,7 +101,7 @@ model Comment {
 
 model Blog {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  title    String  
+  title    String
   content  String
   event_id String? @db.ObjectId
 
@@ -119,6 +119,7 @@ model Booking {
   booking_cart      BookingCart[]
   total_price       Float
   payment_gateway   PaymentGateway
+  payment_status    PaymentStatus @default(PENDING)
   payment_intent_id String
   status            BookingStatus  @default(PENDING)
 
@@ -137,6 +138,13 @@ model File {
   updatedAt DateTime @updatedAt
 
   @@map("Files")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUND
 }
 
 type BookingCart {
